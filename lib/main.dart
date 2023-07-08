@@ -36,32 +36,62 @@ class _HNHomePageState extends State<HNHomePage> {
         title: const Text('Hacker News'),
         backgroundColor: const Color(0xffBE6466),
       ),
-      body: ListView(
-        children: _articles.map(_buildItem).toList(),
-      ),
+      body: Builder(builder: (context) {
+        return RefreshIndicator(
+          onRefresh: () async {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Refreshing...')),
+            );
+          },
+          child: ListView(
+            children: _articles.map(_buildItem).toList(),
+          ),
+        );
+      }),
     );
   }
 
   Widget _buildItem(Article article) {
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: ListTile(
+      child: ExpansionTile(
         title: Text(article.text, style: const TextStyle(fontSize: 20)),
-        subtitle: Row(
-          children: [
-            const Icon(Icons.insert_comment, size: 16),
-            Text("  ${article.commentsCount} comments"),
-          ],
-        ),
-        onTap: () async {
-          final fakeUrl = Uri.parse("https://${article.domain}");
-          if (await canLaunchUrl(fakeUrl)) {
-            launchUrl(fakeUrl);
-            print("launching $fakeUrl");
-          } else {
-            print("Could not launch $fakeUrl");
-          }
-        },
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.insert_comment, size: 16),
+                    Text("  ${article.commentsCount} comments"),
+                  ],
+                ),
+                MaterialButton(
+                  onPressed: () {
+                    launchUrl(Uri.parse('http://${article.domain}'));
+                  },
+                  color: const Color(0xffBE6466).withOpacity(0.9),
+                  textColor: Colors.black,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(30),
+                    ),
+                  ),
+                  child: const Row(
+                    children: [
+                      Text('Open Blog  '),
+                      Icon(Icons.open_in_new, size: 16),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          )
+        ],
       ),
     );
   }
